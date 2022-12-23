@@ -56,6 +56,14 @@ impl Lexer {
 		}
 	}
 
+	pub fn peek_char(&self) -> char {
+		if self.read_position >= self.input.len() {
+			'\0'
+		} else {
+			self.input.chars().nth(self.read_position).expect("fuck")
+		}
+	}
+
 	pub fn next_token(&mut self) -> Token {
 		self.skip_whitespace();
 
@@ -84,6 +92,21 @@ impl Lexer {
 				return illegal;
 			}
 		};
+
+		let token = if token == Token::Assign && self.peek_char() == '=' {
+			self.read_char();
+			Token::Eq
+		} else {
+			token
+		};
+
+		let token = if token == Token::Bang && self.peek_char() == '=' {
+			self.read_char();
+			Token::NotEq
+		} else {
+			token
+		};
+
 		self.output.push(token.clone());
 
 		self.read_char();

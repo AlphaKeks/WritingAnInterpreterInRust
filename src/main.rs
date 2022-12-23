@@ -6,8 +6,6 @@ fn main() {}
 #[cfg(test)]
 #[allow(unused)]
 mod tests {
-	use std::thread::current;
-
 	use crate::{lexer::*, token::*};
 
 	#[test]
@@ -74,6 +72,43 @@ mod tests {
 			Comma,
 			Identifier(String::from("ten")),
 			RParen,
+			Semicolon,
+			Bang,
+			Minus,
+			Slash,
+			Asterisk,
+			Integer(5),
+			Semicolon,
+			Integer(5),
+			LT,
+			Integer(10),
+			GT,
+			Integer(5),
+			Semicolon,
+			Keyword(If),
+			LParen,
+			Integer(5),
+			LT,
+			Integer(10),
+			RParen,
+			LBrace,
+			Keyword(Return),
+			Keyword(True),
+			Semicolon,
+			RBrace,
+			Keyword(Else),
+			LBrace,
+			Keyword(Return),
+			Keyword(False),
+			Semicolon,
+			RBrace,
+			Integer(10),
+			Eq,
+			Integer(10),
+			Semicolon,
+			Integer(10),
+			NotEq,
+			Integer(9),
 			Semicolon,
 			EOF,
 		];
