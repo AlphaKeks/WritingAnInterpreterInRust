@@ -1,4 +1,6 @@
-use crate::token::Token;
+#![allow(dead_code)]
+
+use crate::token::{Keyword, Token};
 
 #[derive(Debug, Clone)]
 pub struct Lexer {
@@ -27,16 +29,69 @@ impl Lexer {
 		self.read_position += 1;
 	}
 
+	pub fn read_identifier(&mut self) -> String {
+		let position = self.position;
+		while is_letter(self.current_char) {
+			self.read_char();
+		}
+		self.input[position..self.position].to_owned()
+	}
+
+	pub fn read_number(&mut self) -> usize {
+		let position = self.position;
+		while self.current_char.is_ascii_digit() {
+			self.read_char();
+		}
+		let potential_int = &self.input[position..self.position];
+		if let Ok(int) = potential_int.parse() {
+			int
+		} else {
+			panic!("Expected Integer. Got `{}` instead.", potential_int);
+		}
+	}
+
+	pub fn skip_whitespace(&mut self) {
+		while self.current_char.is_ascii_whitespace() {
+			self.read_char();
+		}
+	}
+
 	pub fn next_token(&mut self) -> Token {
+		self.skip_whitespace();
+
 		let Ok(token) = self.current_char.to_string().parse::<Token>() else {
-			if self.current_char == '\0' {
-				return Token::EOF
+			 if is_letter(self.current_char) {
+				let ident = self.read_identifier();
+				if let Ok(keyword) = ident.parse::<Keyword>() {
+					let keyword = Token::Keyword(keyword);
+					self.output.push(keyword.clone());
+					return keyword;
+				}
+				let ident = Token::Identifier(ident);
+				self.output.push(ident.clone());
+				return ident;
+			} else if self.current_char.is_ascii_digit() {
+				let int = Token::Integer(self.read_number()); 
+				self.output.push(int.clone());
+				return int;
+			} else if self.current_char == '\0' {
+				let eof = Token::EOF;
+				self.output.push(eof.clone());
+				return eof;
+			} else {
+				let illegal = Token::ILLEGAL(self.current_char.to_string());
+				self.output.push(illegal.clone());
+				return illegal;
 			}
-			return Token::ILLEGAL(self.current_char.to_string());
 		};
 		self.output.push(token.clone());
 
 		self.read_char();
 		token
 	}
+}
+
+pub fn is_letter(char: char) -> bool {
+	// allow `_` in variable names
+	char.is_ascii_alphabetic() || char == '_'
 }
